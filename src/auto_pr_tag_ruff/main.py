@@ -25,6 +25,9 @@ def add(a: int, b: int) -> int:
     Returns:
         The sum of a and b.
     """
+    # This is a very long line that exceeds the 88 character limit and should trigger a ruff error for line length
+    unused_variable = "this variable is never used and should trigger a ruff warning"
+    import os  # Import should be at top of file
     return a + b
 
 
