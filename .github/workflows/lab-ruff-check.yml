@@ -40,12 +40,25 @@ jobs:
     - name: Get changed Python files
       id: changed-files
       run: |
+        # Fetch the remote ref to ensure we have the latest lab branch state
+        git fetch origin lab
+        
         if [ "${{ github.event_name }}" = "push" ]; then
-          # For push events, compare with previous commit
-          CHANGED_FILES=$(git diff --name-only HEAD~1 HEAD -- '*.py' || true)
+          # Get the previous lab branch state before this push
+          BEFORE_SHA="${{ github.event.before }}"
+          
+          if [ "$BEFORE_SHA" = "0000000000000000000000000000000000000000" ]; then
+            # First push to branch, compare with develop
+            echo "First push to lab branch, comparing with develop"
+            CHANGED_FILES=$(git diff --name-only origin/develop...HEAD -- '*.py' || true)
+          else
+            # Compare with the state before this push (handles multiple commits)
+            echo "Comparing with previous lab branch state: $BEFORE_SHA"
+            CHANGED_FILES=$(git diff --name-only "$BEFORE_SHA"...HEAD -- '*.py' || true)
+          fi
         else
-          # For other events, compare with base branch
-          CHANGED_FILES=$(git diff --name-only origin/main...HEAD -- '*.py' || true)
+          # For other events, compare with develop branch
+          CHANGED_FILES=$(git diff --name-only origin/develop...HEAD -- '*.py' || true)
         fi
         
         if [ -z "$CHANGED_FILES" ]; then
