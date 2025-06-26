@@ -45,14 +45,15 @@ def main() -> None:
     print("Tag will point to branch HEAD commit, not merge commit!")
     print("All ruff errors have been fixed!")
     
-    # Testing diff_context with fetch-depth: 0
-    import json  # E402 - import in wrong place
-    test_var = "unused variable for testing"  # F841 - never used
-    print("This line is intentionally very very very very very very very very long to test E501 error detection")  # E501
+    # Testing diff_context with changed_files: false
+    import sys  # E402 - import should be at top
+    new_test_var = "this is a new unused variable"  # F841 - never used
+    print("This is yet another extremely long line that should trigger the line length error E501 for testing purposes")  # E501
     
-    # Additional test with different error types
-    x=1+2  # E225 - missing spaces around operator
-    another_unused="test"  # F841 - another unused variable
+    # More test violations for diff_context
+    y=3*4  # E225 - missing spaces around operator  
+    final_unused_var="testing diff context filtering"  # F841 - unused variable
+    print("Final test line with violations!")
 
 
 if __name__ == "__main__":
