@@ -37,55 +37,22 @@ jobs:
     - name: Install project
       run: poetry install --no-interaction
     
-    - name: Get changed Python files
-      id: changed-files
-      run: |
-        # Fetch the remote ref to ensure we have the latest lab branch state
-        git fetch origin lab
-        
-        if [ "${{ github.event_name }}" = "push" ]; then
-          # Get the previous lab branch state before this push
-          BEFORE_SHA="${{ github.event.before }}"
-          
-          if [ "$BEFORE_SHA" = "0000000000000000000000000000000000000000" ]; then
-            # First push to branch, compare with develop
-            echo "First push to lab branch, comparing with develop"
-            CHANGED_FILES=$(git diff --name-only origin/develop...HEAD -- '*.py' || true)
-          else
-            # Compare with the state before this push (handles multiple commits)
-            echo "Comparing with previous lab branch state: $BEFORE_SHA"
-            CHANGED_FILES=$(git diff --name-only "$BEFORE_SHA"...HEAD -- '*.py' || true)
-          fi
-        else
-          # For other events, compare with develop branch
-          CHANGED_FILES=$(git diff --name-only origin/develop...HEAD -- '*.py' || true)
-        fi
-        
-        if [ -z "$CHANGED_FILES" ]; then
-          echo "No Python files changed"
-          echo "files=" >> $GITHUB_OUTPUT
-          echo "has_changes=false" >> $GITHUB_OUTPUT
-        else
-          echo "Changed Python files:"
-          echo "$CHANGED_FILES"
-          # Convert newlines to space for passing to ruff
-          FILES_SPACE_SEPARATED=$(echo "$CHANGED_FILES" | tr '\n' ' ')
-          echo "files=$FILES_SPACE_SEPARATED" >> $GITHUB_OUTPUT
-          echo "has_changes=true" >> $GITHUB_OUTPUT
-        fi
+    - name: Run reviewdog with ruff (lint)
+      uses: reviewdog/action-ruff@v1
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        level: error
+        reporter: github-check
+        filter_mode: diff_context
+        ruff_flags: 'check --config=pyproject.toml'
+        workdir: '.'
     
-    - name: Run Ruff Check on Changed Files
-      if: steps.changed-files.outputs.has_changes == 'true'
-      run: |
-        source .venv/bin/activate
-        poetry run ruff check ${{ steps.changed-files.outputs.files }}
-    
-    - name: Run Ruff Format Check on Changed Files
-      if: steps.changed-files.outputs.has_changes == 'true'
-      run: |
-        source .venv/bin/activate
-        poetry run ruff format --check ${{ steps.changed-files.outputs.files }}
-    
-    - name: No Python files to check
-      if: steps.changed-files.outputs.has_changes == 'false'
-      run: echo "No Python files were changed in this push"
+    - name: Run reviewdog with ruff (format)
+      uses: reviewdog/action-ruff@v1
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        level: error
+        reporter: github-check
+        filter_mode: diff_context
+        ruff_flags: 'format --check --config=pyproject.toml'
+        workdir: '.'
