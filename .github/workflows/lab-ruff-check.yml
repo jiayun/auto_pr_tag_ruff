@@ -25,4 +25,4 @@ jobs:
         fail_level: error
         level: error
         tool_name: ruff
-        changed_files: true
+        changed_files: false
