@@ -9,7 +9,9 @@
       "Bash(git commit:*)",
       "Bash(gh pr create:*)",
       "Bash(git -C /Users/jiayun/projects/action-ruff status)",
-      "Bash(git -C /Users/jiayun/projects/action-ruff add script.sh)"
+      "Bash(git -C /Users/jiayun/projects/action-ruff add script.sh)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)"
     ],
     "deny": []
   }
