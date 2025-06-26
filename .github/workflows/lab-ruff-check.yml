@@ -7,20 +7,30 @@ on:
 jobs:
   ruff-check:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      checks: write
     
     steps:
     - uses: actions/checkout@v4
-    
-    - name: Run reviewdog with ruff
-      uses: benny123tw/action-ruff@v1
       with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        reporter: github-check
-        filter_mode: nofilter
-        fail_level: error
-        level: error
-        tool_name: ruff
-        changed_files: true
+        fetch-depth: 0  # Fetch full git history for changed files detection
+    
+    - name: Get changed Python files
+      id: changed-files
+      uses: tj-actions/changed-files@v44
+      with:
+        files: |
+          **/*.py
+        separator: ' '
+    
+    - name: Run ruff check on changed files
+      if: steps.changed-files.outputs.any_changed == 'true'
+      uses: astral-sh/ruff-action@v1
+      with:
+        src: ${{ steps.changed-files.outputs.all_changed_files }}
+        args: check --output-format=github
+    
+    - name: Run ruff format check on changed files  
+      if: steps.changed-files.outputs.any_changed == 'true'
+      uses: astral-sh/ruff-action@v1
+      with:
+        src: ${{ steps.changed-files.outputs.all_changed_files }}
+        args: format --check --diff
