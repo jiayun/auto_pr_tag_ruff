@@ -62,6 +62,7 @@ def main() -> None:
     
     # FINAL TEST: Simple error that should cause CI to fail with filter_mode: added
     final_test_error=999  # E225 - missing spaces (NEW LINE for added filter)
+    this_line_is_way_too_long_and_should_definitely_trigger_the_E501_line_length_error_for_sure_absolutely = "test"  # E501
 
 
 if __name__ == "__main__":
