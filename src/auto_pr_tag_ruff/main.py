@@ -59,6 +59,12 @@ def main() -> None:
     very_long_line_that_exceeds_88_characters_limit_and_should_trigger_E501_error_for_testing_purposes = "test"  # E501
     import sys  # E402 - import not at top
     unused_new_var = "this should trigger F841"  # F841
+    
+    # FAIL TEST: These should cause CI to fail
+    import json   # E402 - another import not at top
+    x=1+2+3+4+5  # E225 - missing spaces around operators
+    super_long_variable_name_that_definitely_exceeds_the_line_length_limit_and_should_cause_E501_error = "fail test"  # E501
+    another_unused_variable = "this will trigger F841 unused variable error"  # F841
 
 
 if __name__ == "__main__":
