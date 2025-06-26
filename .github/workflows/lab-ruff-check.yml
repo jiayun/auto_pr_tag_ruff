@@ -37,12 +37,42 @@ jobs:
     - name: Install project
       run: poetry install --no-interaction
     
-    - name: Run Ruff Check
+    - name: Get changed Python files
+      id: changed-files
       run: |
-        source .venv/bin/activate
-        poetry run ruff check .
+        if [ "${{ github.event_name }}" = "push" ]; then
+          # For push events, compare with previous commit
+          CHANGED_FILES=$(git diff --name-only HEAD~1 HEAD -- '*.py' || true)
+        else
+          # For other events, compare with base branch
+          CHANGED_FILES=$(git diff --name-only origin/main...HEAD -- '*.py' || true)
+        fi
+        
+        if [ -z "$CHANGED_FILES" ]; then
+          echo "No Python files changed"
+          echo "files=" >> $GITHUB_OUTPUT
+          echo "has_changes=false" >> $GITHUB_OUTPUT
+        else
+          echo "Changed Python files:"
+          echo "$CHANGED_FILES"
+          # Convert newlines to space for passing to ruff
+          FILES_SPACE_SEPARATED=$(echo "$CHANGED_FILES" | tr '\n' ' ')
+          echo "files=$FILES_SPACE_SEPARATED" >> $GITHUB_OUTPUT
+          echo "has_changes=true" >> $GITHUB_OUTPUT
+        fi
     
-    - name: Run Ruff Format Check
+    - name: Run Ruff Check on Changed Files
+      if: steps.changed-files.outputs.has_changes == 'true'
       run: |
         source .venv/bin/activate
-        poetry run ruff format --check .
+        poetry run ruff check ${{ steps.changed-files.outputs.files }}
+    
+    - name: Run Ruff Format Check on Changed Files
+      if: steps.changed-files.outputs.has_changes == 'true'
+      run: |
+        source .venv/bin/activate
+        poetry run ruff format --check ${{ steps.changed-files.outputs.files }}
+    
+    - name: No Python files to check
+      if: steps.changed-files.outputs.has_changes == 'false'
+      run: echo "No Python files were changed in this push"
