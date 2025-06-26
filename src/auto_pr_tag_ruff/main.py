@@ -54,6 +54,11 @@ def main() -> None:
     z=5*6  # E225 - missing spaces around operator (NEW LINE)
     brand_new_unused="testing added filter mode"  # F841 - unused variable (NEW LINE)
     print("Testing added filter mode successfully!")
+    
+    # NEW TEST: More violations to verify fixed action-ruff
+    very_long_line_that_exceeds_88_characters_limit_and_should_trigger_E501_error_for_testing_purposes = "test"  # E501
+    import sys  # E402 - import not at top
+    unused_new_var = "this should trigger F841"  # F841
 
 
 if __name__ == "__main__":
