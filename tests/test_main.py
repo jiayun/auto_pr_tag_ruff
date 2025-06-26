@@ -1,7 +1,7 @@
 """Tests for the main module."""
 
 
-from auto_pr_tag_ruff.main import add, greet
+from auto_pr_tag_ruff.main import add, get_version, greet
 
 
 class TestGreet:
@@ -35,3 +35,13 @@ class TestAdd:
         """Test adding with zero."""
         assert add(0, 5) == 5
         assert add(5, 0) == 5
+
+
+class TestGetVersion:
+    """Test cases for the get_version function."""
+
+    def test_get_version_format(self):
+        """Test version string format."""
+        version = get_version()
+        assert version.startswith("Version: ")
+        assert "0.1.0" in version
