@@ -66,6 +66,7 @@ def main() -> None:
     brand_new_error_line_that_is_definitely_too_long_and_should_fail_the_CI_with_filter_mode_added = "fail"  # E501 NEW
     another_super_long_line_to_test_diff_context_mode_this_should_definitely_trigger_E501_error = "test"  # E501
     file_mode_test_this_line_is_too_long_and_should_cause_CI_failure_with_file_filter_mode = "test"  # E501
+    import os  # E402 - This should DEFINITELY fail
 
 
 if __name__ == "__main__":
