@@ -42,6 +42,7 @@ def main() -> None:
     print(get_version())
     print(greet("World"))
     print(f"2 + 3 = {add(2, 3)}")
+    print("Tag will point to branch HEAD commit, not merge commit!")
 
 
 if __name__ == "__main__":
