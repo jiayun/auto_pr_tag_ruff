@@ -33,4 +33,4 @@ jobs:
       uses: astral-sh/ruff-action@v1
       with:
         src: ${{ steps.changed-files.outputs.all_changed_files }}
-        args: format --check --diff --output-format=github
+        args: format --check --diff
