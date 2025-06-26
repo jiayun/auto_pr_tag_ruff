@@ -43,11 +43,7 @@ def main() -> None:
     print(greet("World"))
     print(f"2 + 3 = {add(2, 3)}")
     print("Tag will point to branch HEAD commit, not merge commit!")
-    
-    # Test: new ruff violations that should be caught by reviewdog
-    import json  # This import should be at top, not here - E402
-    bad_var = "unused variable"  # F841 - assigned but never used
-    print("This is a very very very very very very very long line that definitely exceeds the 88 character limit")  # E501
+    print("All ruff errors have been fixed!")
 
 
 if __name__ == "__main__":
