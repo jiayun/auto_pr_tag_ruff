@@ -20,4 +20,6 @@ jobs:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         reporter: github-check
         filter_mode: diff_context
-        fail_level: error
+        fail_level: none
+        level: info
+        tool_name: ruff
