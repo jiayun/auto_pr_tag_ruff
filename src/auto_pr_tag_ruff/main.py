@@ -64,6 +64,7 @@ def main() -> None:
     final_test_error=999  # E225 - missing spaces (NEW LINE for added filter)
     this_line_is_way_too_long_and_should_definitely_trigger_the_E501_line_length_error_for_sure_absolutely = "test"  # E501
     brand_new_error_line_that_is_definitely_too_long_and_should_fail_the_CI_with_filter_mode_added = "fail"  # E501 NEW
+    another_super_long_line_to_test_diff_context_mode_this_should_definitely_trigger_E501_error = "test"  # E501
 
 
 if __name__ == "__main__":
