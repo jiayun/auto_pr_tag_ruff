@@ -25,9 +25,6 @@ def add(a: int, b: int) -> int:
     Returns:
         The sum of a and b.
     """
-    # This is a very long line that exceeds the 88 character limit and should trigger a ruff error for line length
-    unused_variable = "this variable is never used and should trigger a ruff warning"
-    import os  # Import should be at top of file
     return a + b
 
 
@@ -47,10 +44,10 @@ def main() -> None:
     print(f"2 + 3 = {add(2, 3)}")
     print("Tag will point to branch HEAD commit, not merge commit!")
     
-    # More ruff violations for testing
-    x=1+2+3+4+5  # No spaces around operators
-    unused_var_2 = "another unused variable that should trigger F841"
-    print("This line is intentionally very very very very very very very very long to exceed 88 characters")
+    # Test: new ruff violations that should be caught by reviewdog
+    import json  # This import should be at top, not here - E402
+    bad_var = "unused variable"  # F841 - assigned but never used
+    print("This is a very very very very very very very long line that definitely exceeds the 88 character limit")  # E501
 
 
 if __name__ == "__main__":

@@ -20,7 +20,7 @@ jobs:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         reporter: github-check
         filter_mode: nofilter
-        fail_level: none
-        level: info
+        fail_level: error
+        level: error
         tool_name: ruff
-        changed_files: false
+        changed_files: true
