@@ -45,15 +45,15 @@ def main() -> None:
     print("Tag will point to branch HEAD commit, not merge commit!")
     print("All ruff errors have been fixed!")
     
-    # Testing diff_context with changed_files: false
-    import sys  # E402 - import should be at top
-    new_test_var = "this is a new unused variable"  # F841 - never used
-    print("This is yet another extremely long line that should trigger the line length error E501 for testing purposes")  # E501
+    # Testing filter_mode: added with changed_files: true
+    import datetime  # E402 - import should be at top (NEW LINE)
+    added_test_var = "this variable is added but unused"  # F841 - never used (NEW LINE)
+    print("This is a completely new extremely long line that should definitely trigger the E501 line length error for our testing")  # E501 (NEW LINE)
     
-    # More test violations for diff_context
-    y=3*4  # E225 - missing spaces around operator  
-    final_unused_var="testing diff context filtering"  # F841 - unused variable
-    print("Final test line with violations!")
+    # Additional new violations to test 'added' filter mode
+    z=5*6  # E225 - missing spaces around operator (NEW LINE)
+    brand_new_unused="testing added filter mode"  # F841 - unused variable (NEW LINE)
+    print("Testing added filter mode successfully!")
 
 
 if __name__ == "__main__":
