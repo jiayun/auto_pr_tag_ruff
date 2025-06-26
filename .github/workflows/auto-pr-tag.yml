@@ -9,6 +9,10 @@ name: Auto PR and Tag on Main Merge
 # 1. Create a PAT with repo and workflow permissions
 # 2. Add it as a secret named AUTO_PR_TOKEN
 # 3. Replace GITHUB_TOKEN with AUTO_PR_TOKEN in the workflow
+#
+# Behavior when same branch is merged multiple times:
+# - PR to develop: Creates new PR if previous one was merged/closed (allows multiple PRs)
+# - Tag: Updates existing tag to point to the new merge commit
 
 on:
   pull_request:
@@ -56,7 +60,7 @@ jobs:
       run: |
         # Check if the PR branch still exists
         if git show-ref --verify --quiet refs/heads/${{ steps.branch.outputs.name }}; then
-          # Check if a PR already exists
+          # Check if an open PR already exists (merged/closed PRs will allow new PR creation)
           EXISTING_PR=$(gh pr list --base develop --head ${{ steps.branch.outputs.name }} --state open --json number --jq '.[0].number' || echo "")
           
           if [ -z "$EXISTING_PR" ]; then
@@ -101,7 +105,14 @@ jobs:
         
         # Check if tag already exists
         if git rev-parse "refs/tags/$TAG_NAME" >/dev/null 2>&1; then
-          echo "Tag $TAG_NAME already exists, skipping tag creation"
+          echo "Tag $TAG_NAME already exists, updating to new commit"
+          # Delete the existing tag locally and remotely
+          git tag -d "$TAG_NAME" || true
+          git push origin ":refs/tags/$TAG_NAME" || true
+          # Create new tag at the new commit
+          git tag -a "$TAG_NAME" "$MERGE_COMMIT" -m "Updated tag for PR #${{ github.event.pull_request.number }}: ${{ github.event.pull_request.title }}"
+          git push origin "$TAG_NAME"
+          echo "Updated and pushed tag: $TAG_NAME to commit: $MERGE_COMMIT"
         else
           git tag -a "$TAG_NAME" "$MERGE_COMMIT" -m "Tag for PR #${{ github.event.pull_request.number }}: ${{ github.event.pull_request.title }}"
           git push origin "$TAG_NAME"
