@@ -46,6 +46,11 @@ def main() -> None:
     print(greet("World"))
     print(f"2 + 3 = {add(2, 3)}")
     print("Tag will point to branch HEAD commit, not merge commit!")
+    
+    # More ruff violations for testing
+    x=1+2+3+4+5  # No spaces around operators
+    unused_var_2 = "another unused variable that should trigger F841"
+    print("This line is intentionally very very very very very very very very long to exceed 88 characters")
 
 
 if __name__ == "__main__":
