@@ -44,6 +44,11 @@ def main() -> None:
     print(f"2 + 3 = {add(2, 3)}")
     print("Tag will point to branch HEAD commit, not merge commit!")
     print("All ruff errors have been fixed!")
+    
+    # New lines with ruff violations to test diff_context
+    import os  # E402 - import should be at top
+    unused_test_var = "this should trigger F841"  # F841 - unused variable
+    print("This is another very very very very very very very long line that exceeds the 88 character limit")  # E501
 
 
 if __name__ == "__main__":
