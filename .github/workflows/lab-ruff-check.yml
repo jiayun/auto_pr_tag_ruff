@@ -13,6 +13,8 @@ jobs:
     
     steps:
     - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Fetch full git history for reviewdog diff context
     
     - name: Run reviewdog with ruff
       uses: benny123tw/action-ruff@v1
