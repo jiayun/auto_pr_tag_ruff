@@ -1,5 +1,15 @@
 name: Auto PR and Tag on Main Merge
 
+# Note: This workflow requires the following GitHub settings:
+# 1. Go to Settings > Actions > General
+# 2. Under "Workflow permissions", select "Read and write permissions"
+# 3. Check "Allow GitHub Actions to create and approve pull requests"
+# 
+# Alternatively, you can use a Personal Access Token (PAT):
+# 1. Create a PAT with repo and workflow permissions
+# 2. Add it as a secret named AUTO_PR_TOKEN
+# 3. Replace GITHUB_TOKEN with AUTO_PR_TOKEN in the workflow
+
 on:
   pull_request:
     types: [closed]
@@ -13,6 +23,7 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
+      issues: write
     
     steps:
     - name: Checkout repository
@@ -83,11 +94,13 @@ jobs:
     - name: Create tag for the branch
       run: |
         # Create tag from the merge commit
-        TAG_NAME="${{ steps.branch.outputs.name }}"
+        BRANCH_NAME="${{ steps.branch.outputs.name }}"
+        # Replace slashes with dashes for valid tag names
+        TAG_NAME=$(echo "$BRANCH_NAME" | sed 's/\//-/g')
         MERGE_COMMIT="${{ github.event.pull_request.merge_commit_sha }}"
         
         # Check if tag already exists
-        if git rev-parse "$TAG_NAME" >/dev/null 2>&1; then
+        if git rev-parse "refs/tags/$TAG_NAME" >/dev/null 2>&1; then
           echo "Tag $TAG_NAME already exists, skipping tag creation"
         else
           git tag -a "$TAG_NAME" "$MERGE_COMMIT" -m "Tag for PR #${{ github.event.pull_request.number }}: ${{ github.event.pull_request.title }}"
