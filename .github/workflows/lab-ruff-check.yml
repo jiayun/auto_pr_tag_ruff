@@ -17,7 +17,7 @@ jobs:
         fetch-depth: 0  # Fetch full git history for reviewdog diff context
     
     - name: Run reviewdog with ruff
-      uses: benny123tw/action-ruff@v1
+      uses: jiayun/action-ruff@main
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         reporter: github-check
