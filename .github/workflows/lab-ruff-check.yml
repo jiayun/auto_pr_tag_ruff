@@ -1,0 +1,26 @@
+name: Lab Branch Ruff Check
+
+on:
+  push:
+    branches: [ lab ]
+
+jobs:
+  ruff-check:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      checks: write
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Run reviewdog with ruff
+      uses: benny123tw/action-ruff@v1
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        reporter: github-check
+        filter_mode: nofilter
+        fail_level: error
+        level: error
+        tool_name: ruff
+        changed_files: true

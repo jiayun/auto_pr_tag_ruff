@@ -43,6 +43,7 @@ def main() -> None:
     print(greet("World"))
     print(f"2 + 3 = {add(2, 3)}")
     print("Tag will point to branch HEAD commit, not merge commit!")
+    print("All ruff errors have been fixed!")
 
 
 if __name__ == "__main__":
