@@ -12,7 +12,7 @@ name: Auto PR and Tag on Main Merge
 #
 # Behavior when same branch is merged multiple times:
 # - PR to develop: Creates new PR if previous one was merged/closed (allows multiple PRs)
-# - Tag: Updates existing tag to point to the new merge commit
+# - Tag: Updates existing tag to point to the branch HEAD commit (not merge commit)
 
 on:
   pull_request:
@@ -97,24 +97,32 @@ jobs:
     
     - name: Create tag for the branch
       run: |
-        # Create tag from the merge commit
+        # Create tag from the branch HEAD (not merge commit)
         BRANCH_NAME="${{ steps.branch.outputs.name }}"
         # Replace slashes with dashes for valid tag names
         TAG_NAME=$(echo "$BRANCH_NAME" | sed 's/\//-/g')
         MERGE_COMMIT="${{ github.event.pull_request.merge_commit_sha }}"
+        BRANCH_HEAD="${{ github.event.pull_request.head.sha }}"
+        
+        echo "Branch: $BRANCH_NAME"
+        echo "Merge commit: $MERGE_COMMIT" 
+        echo "Branch HEAD: $BRANCH_HEAD"
+        echo "Will tag branch HEAD commit: $BRANCH_HEAD"
         
         # Check if tag already exists
         if git rev-parse "refs/tags/$TAG_NAME" >/dev/null 2>&1; then
-          echo "Tag $TAG_NAME already exists, updating to new commit"
+          EXISTING_TAG_COMMIT=$(git rev-parse "refs/tags/$TAG_NAME")
+          echo "Tag $TAG_NAME already exists, pointing to: $EXISTING_TAG_COMMIT"
+          echo "Updating tag to point to branch HEAD: $BRANCH_HEAD"
           # Delete the existing tag locally and remotely
           git tag -d "$TAG_NAME" || true
           git push origin ":refs/tags/$TAG_NAME" || true
-          # Create new tag at the new commit
-          git tag -a "$TAG_NAME" "$MERGE_COMMIT" -m "Updated tag for PR #${{ github.event.pull_request.number }}: ${{ github.event.pull_request.title }}"
+          # Create new tag at the branch HEAD
+          git tag -a "$TAG_NAME" "$BRANCH_HEAD" -m "Updated tag for PR #${{ github.event.pull_request.number }}: ${{ github.event.pull_request.title }}"
           git push origin "$TAG_NAME"
-          echo "Updated and pushed tag: $TAG_NAME to commit: $MERGE_COMMIT"
+          echo "Updated and pushed tag: $TAG_NAME to branch HEAD: $BRANCH_HEAD"
         else
-          git tag -a "$TAG_NAME" "$MERGE_COMMIT" -m "Tag for PR #${{ github.event.pull_request.number }}: ${{ github.event.pull_request.title }}"
+          git tag -a "$TAG_NAME" "$BRANCH_HEAD" -m "Tag for PR #${{ github.event.pull_request.number }}: ${{ github.event.pull_request.title }}"
           git push origin "$TAG_NAME"
-          echo "Created and pushed tag: $TAG_NAME"
+          echo "Created and pushed tag: $TAG_NAME at branch HEAD: $BRANCH_HEAD"
         fi
