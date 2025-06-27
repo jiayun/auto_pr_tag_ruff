@@ -87,7 +87,9 @@ jobs:
               --base develop \
               --head "$BRANCH_NAME" \
               --title "Develop: $BRANCH_NAME" \
-              --body-file pr_body.md || echo "Failed to create PR (branch might not have new commits for develop)"
+              --body-file pr_body.md \
+              --label "develop" \
+              --reviewer "jiayun" || echo "Failed to create PR (branch might not have new commits for develop)"
           else
             echo "PR already exists: #$EXISTING_PR"
           fi
