@@ -42,6 +42,31 @@ def get_changed_lines(file_path: str) -> Set[int]:
                 current_line += 1
             # Lines starting with - are deletions (don't increment line number)
         
+        # If no diff output, check if file is new or has unstaged changes
+        if not result.stdout.strip():
+            # Try to get unstaged changes
+            result = subprocess.run(
+                ["git", "diff", "--", file_path],
+                capture_output=True,
+                text=True,
+                check=True
+            )
+            
+            for line in result.stdout.split('\n'):
+                # Look for hunk headers like @@ -1,4 +1,6 @@
+                hunk_match = re.match(r'^@@\s+-\d+(?:,\d+)?\s+\+(\d+)(?:,\d+)?\s+@@', line)
+                if hunk_match:
+                    current_line = int(hunk_match.group(1))
+                    continue
+                
+                # Lines starting with + are additions (except +++)
+                if line.startswith('+') and not line.startswith('+++'):
+                    changed_lines.add(current_line)
+                    current_line += 1
+                # Lines starting with space are context (no change)
+                elif line.startswith(' '):
+                    current_line += 1
+                    
         return changed_lines
     except subprocess.CalledProcessError:
         # If git diff fails, return empty set (no changes or file is new)
@@ -105,12 +130,28 @@ def filter_ruff_results(ruff_results: List[Dict], changed_files: List[str]) -> L
         file_path = result.get('filename', '')
         line_number = result.get('location', {}).get('row', 0)
         
-        if file_path in changed_files:
+        # Check if this file is in our list of changed files (handle both absolute and relative paths)
+        is_changed_file = False
+        for changed_file in changed_files:
+            if file_path.endswith(changed_file) or changed_file.endswith(file_path) or file_path == changed_file:
+                is_changed_file = True
+                # Use the changed_file path for consistency
+                file_path = changed_file
+                break
+        
+        if is_changed_file:
             changed_lines = get_changed_lines(file_path)
             
-            # If no changed lines detected or line is in changed lines, include the result
-            if not changed_lines or line_number in changed_lines:
+            # If no changed lines detected, include all results (file might be new)
+            if not changed_lines:
                 filtered_results.append(result)
+            else:
+                # Include issues that are on changed lines or within a few lines of changes
+                # This handles cases where adding a line affects nearby code (like import sorting)
+                for changed_line in changed_lines:
+                    if abs(line_number - changed_line) <= 2:  # Within 2 lines of a change
+                        filtered_results.append(result)
+                        break
     
     return filtered_results
 
