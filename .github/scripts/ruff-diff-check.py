@@ -6,6 +6,7 @@ then runs ruff and filters the output to only include issues on those lines.
 """
 
 import json
+import os
 import re
 import subprocess
 import sys
@@ -14,10 +15,19 @@ from typing import Dict, List, Set
 
 def get_changed_lines(file_path: str) -> Set[int]:
     """Get the set of changed line numbers for a file."""
+    # Use environment variables for base ref, with fallback to HEAD~1
+    base_ref = os.environ.get('GITHUB_BASE_REF')
+    if base_ref:
+        # In PR context, compare against the base branch
+        base_ref = f"origin/{base_ref}"
+    else:
+        # Fallback to previous commit for local development
+        base_ref = "HEAD~1"
+    
     try:
         # Get the diff for this specific file
         result = subprocess.run(
-            ["git", "diff", "HEAD~1", "HEAD", "--", file_path],
+            ["git", "diff", base_ref, "HEAD", "--", file_path],
             capture_output=True,
             text=True,
             check=True,
@@ -70,8 +80,8 @@ def get_changed_lines(file_path: str) -> Set[int]:
                     current_line += 1
 
         return changed_lines
-    except subprocess.CalledProcessError:
-        # If git diff fails, return empty set (no changes or file is new)
+    except subprocess.CalledProcessError as e:
+        print(f"Warning: git diff failed for {file_path}: {e}", file=sys.stderr)
         return set()
 
 
@@ -87,7 +97,11 @@ def run_ruff_check(files: List[str]) -> List[Dict]:
         if result.stdout:
             return json.loads(result.stdout)
         return []
-    except (subprocess.CalledProcessError, json.JSONDecodeError):
+    except subprocess.CalledProcessError as e:
+        print(f"Warning: ruff check failed: {e}", file=sys.stderr)
+        return []
+    except json.JSONDecodeError as e:
+        print(f"Warning: failed to parse ruff check output as JSON: {e}", file=sys.stderr)
         return []
 
 
@@ -122,7 +136,8 @@ def run_ruff_format_check(files: List[str]) -> List[str]:
                     current_file = match.group(1)
 
         return format_issues
-    except subprocess.CalledProcessError:
+    except subprocess.CalledProcessError as e:
+        print(f"Warning: ruff format check failed: {e}", file=sys.stderr)
         return []
 
 

@@ -20,12 +20,18 @@ When working with existing codebases, you often want to ensure that your changes
 - ✅ Detects import sorting issues that affect nearby lines
 - ✅ Returns appropriate exit codes for CI/CD integration
 - ✅ Works with both absolute and relative file paths
+- ✅ CI environment compatibility with `GITHUB_BASE_REF` support
+- ✅ Improved error handling with warning messages
 
 ## Usage
 
 ```bash
 python .github/scripts/ruff-diff-check.py <file1> [file2] [file3] ...
 ```
+
+## Environment Variables
+
+- `GITHUB_BASE_REF`: When set (typically in GitHub Actions PR context), the script will compare against `origin/{GITHUB_BASE_REF}` instead of `HEAD~1`. This allows proper comparison against the target branch in pull requests.
 
 ## Integration with GitHub Actions
 
