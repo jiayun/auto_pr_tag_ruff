@@ -16,14 +16,8 @@ from typing import Dict, List, Set
 def get_changed_lines(file_path: str) -> Set[int]:
     """Get the set of changed line numbers for a file."""
     # Use environment variables for base ref, with fallback to HEAD~1
-    base_ref = os.environ.get('GITHUB_BASE_REF')
-    if base_ref:
-        # In PR context, compare against the base branch
-        base_ref = f"origin/{base_ref}"
-    else:
-        # Fallback to previous commit for local development
-        base_ref = "HEAD~1"
-    
+    base_ref = os.environ.get("GITHUB_BASE_REF")
+    base_ref = f"origin/{base_ref}" if base_ref else "HEAD~1"
     try:
         # Get the diff for this specific file
         result = subprocess.run(
@@ -101,7 +95,10 @@ def run_ruff_check(files: List[str]) -> List[Dict]:
         print(f"Warning: ruff check failed: {e}", file=sys.stderr)
         return []
     except json.JSONDecodeError as e:
-        print(f"Warning: failed to parse ruff check output as JSON: {e}", file=sys.stderr)
+        print(
+            f"Warning: failed to parse ruff check output as JSON: {e}",
+            file=sys.stderr,
+        )
         return []
 
 
