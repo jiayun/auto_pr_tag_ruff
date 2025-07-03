@@ -1,6 +1,5 @@
 """Tests for the main module."""
 
-
 from auto_pr_tag_ruff.main import add, get_version, greet
 
 

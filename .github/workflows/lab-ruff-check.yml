@@ -21,16 +21,21 @@ jobs:
           **/*.py
         separator: ' '
     
-    - name: Run ruff check on changed files
+    - name: Set up Python
       if: steps.changed-files.outputs.any_changed == 'true'
-      uses: astral-sh/ruff-action@v1
+      uses: actions/setup-python@v5
       with:
-        src: ${{ steps.changed-files.outputs.all_changed_files }}
-        args: check --output-format=github
+        python-version: '3.11'
     
-    - name: Run ruff format check on changed files  
+    - name: Install ruff
       if: steps.changed-files.outputs.any_changed == 'true'
-      uses: astral-sh/ruff-action@v1
-      with:
-        src: ${{ steps.changed-files.outputs.all_changed_files }}
-        args: format --check --diff
+      run: pip install ruff
+    
+    - name: Make script executable
+      if: steps.changed-files.outputs.any_changed == 'true'
+      run: chmod +x .github/scripts/ruff-diff-check.py
+    
+    - name: Run ruff check on changed lines only
+      if: steps.changed-files.outputs.any_changed == 'true'
+      run: |
+        python .github/scripts/ruff-diff-check.py ${{ steps.changed-files.outputs.all_changed_files }}
